@@ -1,0 +1,12 @@
+موقع الحسابات - شركة الربيع
+==============================
+الملفات: index.html (الموقع) - add.html (لوحة الإدارة) - games.js (الألعاب والأسعار) - logo.png - jszip.min.js - images/ (البوسترات)
+
+1) ارفع كل الملفات والفولدر images على ريبو جديد (مثلاً: accounts) على GitHub
+2) Settings > Pages > Branch: main / root > Save
+3) الموقع:   https://USERNAME.github.io/accounts/
+   اللوحة:   https://USERNAME.github.io/accounts/add.html
+4) في اللوحة: اربط بمفتاح (Fine-grained token) على الريبو ده بصلاحية Contents = Read and write.
+5) من اللوحة تقدر: تضيف لعبة، تغيّر الأسعار، تخلّيها غير متاحة، تحذفها، وترفع بوسترات.
+
+ملاحظة: الأسعار بالجنيه. خانة السعر الفاضية = النوع ده مش متاح.
