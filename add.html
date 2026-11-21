@@ -130,6 +130,8 @@ code{background:var(--bg);padding:1px 6px;border-radius:6px;direction:ltr;displa
       <input type="text" id="tg">
       <label for="nt">ملاحظة تظهر في التفاصيل (اختياري)</label>
       <input type="text" id="nt">
+      <label for="u">رابط فيديو أو صفحة تفاصيل اللعبة (اختياري)</label>
+      <input type="text" id="u" dir="ltr" style="text-align:right" placeholder="https://www.youtube.com/watch?v=...">
       <label for="i">فكرة اللعبة (اختياري)</label>
       <textarea id="i" placeholder="جملة أو اتنين عن اللي بتعمله في اللعبة"></textarea>
       <label for="s">نبذة عن اللعبة (اختياري)</label>
@@ -276,12 +278,13 @@ function lineObj(){
   o.pr=pr;
   if($("tg").value.trim())o.tag=$("tg").value.trim();
   if($("nt").value.trim())o.note=$("nt").value.trim();
+  var uu=$("u").value.trim();if(uu&&/^https?:\/\//i.test(uu))o.u=uu;
   if($("fk").checked)o.k=true;if($("fa").checked)o.a=true;if($("fx").checked)o.x=true;
   if(editOld){["g","r","p"].forEach(function(k){if(editOld[k])o[k]=editOld[k]})}
   return o;
 }
 function clearForm(){
-  ["n","i","s","id","tg","nt","p4P","p4S","p5P","p5S"].forEach(function(k){$(k).value=""});
+  ["n","i","s","id","tg","nt","u","p4P","p4S","p5P","p5S"].forEach(function(k){$(k).value=""});
   ["mL","mO","fk","fa","fx"].forEach(function(k){$(k).checked=false});$("mS").checked=true;
   $("pf").value="";$("pv1").hidden=true;$("c").selectedIndex=0;idEdited=false;
   editing=null;editOld=null;$("editBar").hidden=true;$("id").readOnly=false;$("formTitle").textContent="بيانات اللعبة";$("pub").textContent="🚀 نشر في الموقع";
@@ -289,7 +292,7 @@ function clearForm(){
 function fillForm(g){
   clearForm();editing=g.id;editOld=g;
   $("n").value=g.n||"";$("c").value=g.c||"ac";$("id").value=g.id;$("id").readOnly=true;
-  $("i").value=g.i||"";$("s").value=g.s||"";$("tg").value=g.tag||"";$("nt").value=g.note||"";
+  $("i").value=g.i||"";$("s").value=g.s||"";$("tg").value=g.tag||"";$("nt").value=g.note||"";$("u").value=g.u||"";
   var m=g.m||"S";$("mS").checked=m.indexOf("S")>-1;$("mL").checked=m.indexOf("L")>-1;$("mO").checked=m.indexOf("O")>-1;
   $("fk").checked=!!g.k;$("fa").checked=!!g.a;$("fx").checked=!!g.x;
   var pr=g.pr||{};$("p4P").value=(pr["4"]||{}).P||"";$("p4S").value=(pr["4"]||{}).S||"";$("p5P").value=(pr["5"]||{}).P||"";$("p5S").value=(pr["5"]||{}).S||"";
@@ -303,6 +306,7 @@ $("pub").onclick=function(){
   var o=lineObj();
   if(!o.n){w.hidden=false;w.textContent="اكتب اسم اللعبة.";return}
   if(!o.id){w.hidden=false;w.textContent="اكتب اسم اللعبة بحروف إنجليزي.";return}
+  if($("u").value.trim()&&!o.u){w.hidden=false;w.textContent="الرابط لازم يبدأ بـ https://";return}
   if(!Object.keys(o.pr).length){w.hidden=false;w.textContent="اكتب سعر واحد على الأقل.";return}
   var b=$("pub"),isEdit=!!editing;b.disabled=true;m.textContent=isEdit?"بحفظ التعديل…":"بنشر اللعبة…";
   editData(function(arr){

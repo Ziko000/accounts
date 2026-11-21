@@ -99,6 +99,12 @@ button{cursor:pointer}
 .btn-add:disabled{background:var(--line);color:var(--muted);cursor:not-allowed}
 .btn-info{background:var(--bg);color:var(--ink);border:1.5px solid var(--line)}
 .btn:focus-visible,.chip:focus-visible,.poster:focus-visible{outline:3px solid var(--orange-2);outline-offset:2px}
+.reqcta{margin:24px 0 0;padding:16px;border:2px dashed var(--orange);border-radius:16px;text-align:center;display:flex;flex-direction:column;gap:8px;align-items:center}
+.reqcta span{color:var(--muted);font-size:14px}
+.reqcta .btn{background:var(--orange);color:#fff;border:0;border-radius:12px;padding:10px 18px;font:700 15px Cairo,sans-serif;cursor:pointer}
+textarea.in{resize:vertical;min-height:70px;font-family:inherit}
+.vid{display:block;margin-top:12px;text-align:center;padding:10px;border:2px solid var(--navy);border-radius:12px;color:var(--navy);font-weight:700;text-decoration:none}
+@media (prefers-color-scheme: dark){.vid{color:#fff;border-color:#fff}}
 .empty{text-align:center;color:var(--muted);padding:50px 10px}
 
 /* bottom bar */
@@ -181,6 +187,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin:34px 0 10px}
   <div class="count" id="count" aria-live="polite"></div>
   <section class="grid" id="grid" aria-label="قائمة الحسابات"></section>
   <div class="empty" id="empty" hidden>مفيش ألعاب مطابقة. جرّب كلمة تانية.</div>
+  <div class="reqcta"><b>مش لاقي اللعبة اللي عايزها؟</b><span>اكتب اسمها وهنراجع توفرها ونرد عليك.</span><button class="btn" id="reqBtn" type="button">🆕 اطلب لعبة غير موجودة</button></div>
   <footer>شركة الربيع © <span id="yr"></span></footer>
 </main>
 
@@ -204,7 +211,9 @@ footer{text-align:center;color:var(--muted);font-size:13px;margin:34px 0 10px}
     <button class="x" id="oClose" aria-label="إغلاق">×</button>
     <h3 id="oTitle">طلبك</h3>
     <ul class="list" id="oList"></ul>
-    <div class="total"><span>الإجمالي</span><span class="price" id="oTotal"></span></div>
+    <label class="f" for="rq">عايز لعبة مش في القايمة؟ اكتب اسمها (اختياري)</label>
+    <textarea class="in" id="rq" rows="3" maxlength="400" placeholder="مثال: Elden Ring PS5 برايمري&#10;كل لعبة في سطر"></textarea>
+    <div class="total" id="oTotalRow"><span>الإجمالي</span><span class="price" id="oTotal"></span></div>
 
     <label class="f" for="nm">الاسم</label>
     <input class="in" id="nm" type="text" autocomplete="name" placeholder="اكتب اسمك">
@@ -276,9 +285,9 @@ function toast(t){var e=$("toast");e.textContent=t;e.classList.add("show");clear
 
 /* حفظ الاختيارات (اختياري) */
 function save(){try{localStorage.setItem("rbacc2_sel",JSON.stringify([...sel]))}catch(e){}
-  try{localStorage.setItem("rbacc2_form",JSON.stringify({n:$("nm").value,p:$("ph").value,b:(document.querySelector("input[name=br]:checked")||{}).value||""}))}catch(e){}}
+  try{localStorage.setItem("rbacc2_form",JSON.stringify({n:$("nm").value,p:$("ph").value,b:(document.querySelector("input[name=br]:checked")||{}).value||"",r:$("rq").value}))}catch(e){}}
 function load(){try{JSON.parse(localStorage.getItem("rbacc2_sel")||"[]").forEach(function(k){if(validKey(k))sel.add(k)})}catch(e){}
-  try{var f=JSON.parse(localStorage.getItem("rbacc2_form")||"{}");$("nm").value=f.n||"";$("ph").value=f.p||"";if(f.b){var r=document.querySelector("input[name=br][value="+f.b+"]");if(r)r.checked=true}}catch(e){}}
+  try{var f=JSON.parse(localStorage.getItem("rbacc2_form")||"{}");$("nm").value=f.n||"";$("ph").value=f.p||"";$("rq").value=f.r||"";if(f.b){var r=document.querySelector("input[name=br][value="+f.b+"]");if(r)r.checked=true}}catch(e){}}
 
 function modeTags(g){
   var h="";
@@ -391,11 +400,17 @@ function openD(id){
     (g.note?'<div class="note">'+esc(g.note)+'</div>':'')+
     (g.x?'<div class="note">الحساب ده غير متاح حالياً.</div>':'')+
     (g.g?'<div class="note">وصف اللعبة دي مؤقت وهيتحدّث.</div>':'')+
+    videoLink(g)+
     '<div class="sec"><h4>اختار نوع الحساب (PS'+st.plat+')</h4></div>'+
     '<div class="dbtns">'+["P","S"].map(function(t){var pr=priceOf(g,st.plat,t),dis=g.x||pr==null,on=sel.has(g.id+"|"+st.plat+"|"+t);
       return '<button class="btn btn-t'+(on?' on':'')+'" data-a="addD" data-id="'+g.id+'" data-t="'+t+'"'+(dis?' disabled':'')+'>'+(on?'✓ ':'')+TYPES[t]+'<small>'+(pr==null?'غير متاح':fmt(pr)+' ج')+'</small></button>'}).join("")+'</div>';
   $("ovD").classList.add("open");
   $("sheetD").scrollTop=0;
+}
+function videoLink(g){
+  var u=(g.u&&/^https?:\/\//i.test(g.u))?g.u:"";
+  var yt="https://www.youtube.com/results?search_query="+encodeURIComponent(g.n+" gameplay");
+  return '<a class="vid" target="_blank" rel="noopener noreferrer" href="'+esc(u||yt)+'">'+(u?'🎬 تفاصيل وفيديو اللعبة':'🎬 شوف فيديو اللعبة على يوتيوب')+'</a>';
 }
 function playText(g){
   var a=[];
@@ -408,8 +423,8 @@ function playText(g){
 /* الطلب */
 function renderOrder(){
   var ids=[...sel].filter(validKey);
-  if(!ids.length){$("ovO").classList.remove("open");return}
-  $("oTitle").textContent="طلبك ("+ids.length+")";
+  $("oTitle").textContent=ids.length?"طلبك ("+ids.length+")":"طلب لعبة غير موجودة";
+  $("oTotalRow").style.display=ids.length?"":"none";
   $("oList").innerHTML=ids.map(function(k){var o=parseKey(k),g=byId[o.id],pr=priceOf(g,o.pl,o.t);
     return '<li><span>'+esc(g.n)+' <b style="color:var(--orange)">— PS'+o.pl+' — '+TYPES[o.t]+'</b> <span class="price">'+fmt(pr)+' ج</span></span><button data-a="rm" data-k="'+esc(k)+'" aria-label="شيل '+esc(g.n)+'">×</button></li>'}).join("");
   $("oTotal").textContent=fmt(totalOf())+" جنيه";
@@ -428,16 +443,19 @@ function validate(){
   return nOK&&pOK&&!!b ? {n:n,p:p.replace(/^20/,"").replace(/^(?=1)/,"0"),b:CONFIG.branches.filter(function(x){return x.id===b.value})[0]} : null;
 }
 function waLink(o){
-  var lines=["السلام عليكم، عايز أطلب الحسابات دي:","",
-    "👤 الاسم: "+o.n,"📞 التليفون: "+o.p,"📍 الفرع: "+o.b.name,"",
-    "🎮 الحسابات ("+sel.size+"):"];
+  var rq=$("rq").value.trim();
+  var lines=["السلام عليكم، عايز أطلب"+(sel.size?" الحسابات دي:":" حساب لعبة:"),"",
+    "👤 الاسم: "+o.n,"📞 التليفون: "+o.p,"📍 الفرع: "+o.b.name,""];
+  if(sel.size)lines.push("🎮 الحسابات ("+sel.size+"):");
   [...sel].forEach(function(k,i){var o=parseKey(k),g=byId[o.id];lines.push((i+1)+". "+g.n+" — PS"+o.pl+" — "+TYPES[o.t]+" — "+fmt(priceOf(g,o.pl,o.t))+" جنيه")});
-  lines.push("","💰 الإجمالي: "+fmt(totalOf())+" جنيه","","شكراً 🙏");
+  if(sel.size)lines.push("","💰 الإجمالي: "+fmt(totalOf())+" جنيه");
+  if(rq)lines.push("","🆕 لعبة مش في القايمة (عايز أعرف متاحة ولا لا وسعرها):",rq);
+  lines.push("","شكراً 🙏");
   var phone="2"+o.b.phone; // مصر: 20 + الرقم بدون صفر
   return "https://wa.me/"+phone+"?text="+encodeURIComponent(lines.join("\n"));
 }
 function send(){
-  if(!sel.size){toast("اختار حساب واحد على الأقل");return}
+  if(!sel.size&&!$("rq").value.trim()){toast("اختار حساب أو اكتب اسم اللعبة اللي عايزها");return}
   var o=validate(); if(!o)return;
   save();
   var url=waLink(o);
@@ -476,6 +494,7 @@ $("sheetD").addEventListener("click",function(e){
 $("ovD").addEventListener("click",function(e){if(e.target===this)this.classList.remove("open")});
 $("barGo").addEventListener("click",function(){renderOrder();$("ovO").classList.add("open")});
 $("bar").addEventListener("click",function(e){if(e.target.closest(".bar-in")&&!e.target.closest("#barGo")){renderOrder();$("ovO").classList.add("open")}});
+$("reqBtn").addEventListener("click",function(){renderOrder();$("ovO").classList.add("open");setTimeout(function(){$("rq").focus()},50)});
 $("oClose").addEventListener("click",function(){$("ovO").classList.remove("open")});
 $("ovO").addEventListener("click",function(e){if(e.target===this)this.classList.remove("open")});
 $("oList").addEventListener("click",function(e){var b=e.target.closest("[data-a=rm]");if(b){sel.delete(b.dataset.k);save();render();renderOrder()}});
